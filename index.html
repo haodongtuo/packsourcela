@@ -898,93 +898,148 @@
         <p class="section-sub">Watch how our auto-assembly box eliminates every frustrating step of traditional cardboard — no tape, no folding, no wasted time.</p>
       </div>
 
-      <style>
-.pd-scene{perspective:700px;width:160px;height:160px;margin:0 auto}
-.pd-box{width:160px;height:160px;position:relative;transform-style:preserve-3d;transform:rotateX(18deg) rotateY(-32deg);animation:pdReveal 6s ease-in-out infinite}
-.pd-face{position:absolute;width:160px;height:160px;border:1px solid rgba(255,255,255,0.1)}
-.pd-front {background:#C49A5A;transform:translateZ(80px)}
-.pd-back  {background:#A87D45;transform:rotateY(180deg) translateZ(80px)}
-.pd-right {background:#B8894E;transform:rotateY(90deg) translateZ(80px)}
-.pd-left  {background:#BF9158;transform:rotateY(-90deg) translateZ(80px)}
-.pd-bottom{background:#9E7238;transform:rotateX(-90deg) translateZ(80px)}
-.pd-lid   {background:#C9A060;transform-origin:bottom;animation:pdLid 6s ease-in-out infinite;position:absolute;width:160px;height:160px;border:1px solid rgba(255,255,255,0.1);transform:rotateX(90deg) translateZ(80px)}
-@keyframes pdReveal{
-  0%{transform:rotateX(18deg) rotateY(-32deg) scaleY(0.04);opacity:.3}
-  20%{transform:rotateX(18deg) rotateY(-32deg) scaleY(1);opacity:1}
-  75%{transform:rotateX(18deg) rotateY(20deg) scaleY(1);opacity:1}
-  92%{transform:rotateX(18deg) rotateY(20deg) scaleY(1);opacity:1}
-  100%{transform:rotateX(18deg) rotateY(-32deg) scaleY(0.04);opacity:.3}
-}
-@keyframes pdLid{
-  0%,18%{transform:rotateX(90deg) translateZ(80px)}
-  28%{transform:rotateX(150deg) translateZ(80px)}
-  68%{transform:rotateX(150deg) translateZ(80px)}
-  80%{transform:rotateX(90deg) translateZ(80px)}
-  100%{transform:rotateX(90deg) translateZ(80px)}
-}
-.pd-badge{position:absolute;top:6%;right:6%;background:rgba(76,175,80,0.92);color:#fff;font-size:.68rem;font-weight:700;padding:5px 12px;border-radius:20px;letter-spacing:1.5px;text-transform:uppercase}
-.pd-phase{font-size:1rem;font-weight:700;color:#81C784;letter-spacing:3px;text-transform:uppercase;transition:opacity .3s}
-.pd-sub{font-size:.78rem;color:rgba(255,255,255,.5);margin-top:5px;transition:opacity .3s}
-.pd-dots{display:flex;gap:24px;justify-content:center;margin-top:18px}
-.pd-dot-item{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:.65rem;letter-spacing:2px;color:rgba(255,255,255,.25);text-transform:uppercase;transition:color .4s}
-.pd-dot-item.on{color:#81C784}
-.pd-pip{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);transition:background .4s,box-shadow .4s}
-.pd-dot-item.on .pd-pip{background:#81C784;box-shadow:0 0 8px #81C784}
-.pd-vs{position:absolute;bottom:6%;left:6%;font-size:.65rem;color:rgba(255,255,255,.3);letter-spacing:1px}
-</style>
-
-<div style="max-width:780px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);background:linear-gradient(150deg,#0c1a0c 0%,#162816 100%);aspect-ratio:16/9;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;">
-
-  <div class="pd-badge">⚡ 75% Faster Packing</div>
-
-  <div class="pd-scene">
-    <div class="pd-box">
-      <div class="pd-face pd-front"></div>
-      <div class="pd-face pd-back"></div>
-      <div class="pd-face pd-right"></div>
-      <div class="pd-face pd-left"></div>
-      <div class="pd-face pd-bottom"></div>
-      <div class="pd-lid"></div>
-    </div>
-  </div>
-
-  <div style="text-align:center;margin-top:20px;">
-    <div class="pd-phase" id="pdPhase">PULL →</div>
-    <div class="pd-sub" id="pdSub">One motion — box snaps into shape instantly.</div>
-  </div>
-
-  <div class="pd-dots">
-    <div class="pd-dot-item on" id="pd1"><div class="pd-pip"></div><span>Pull</span></div>
-    <div class="pd-dot-item" id="pd2"><div class="pd-pip"></div><span>Load</span></div>
-    <div class="pd-dot-item" id="pd3"><div class="pd-pip"></div><span>Seal</span></div>
-  </div>
-
-  <div class="pd-vs">Traditional boxes: 6+ steps &nbsp;|&nbsp; PackSource: 3 steps</div>
-
+      <div style="max-width:780px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);position:relative;aspect-ratio:16/9;background:#0c1a0c;">
+  <canvas id="packCanvas" style="display:block;width:100%;height:100%;"></canvas>
   <script>
   (function(){
-    var steps=[
-      {id:'pd1',phase:'PULL →',sub:'One motion — box snaps into shape instantly.'},
-      {id:'pd2',phase:'LOAD ↓',sub:'Fill it up. Rigid sides hold firm on their own.'},
-      {id:'pd3',phase:'SEAL ✓',sub:'Close and ship. Done in under 10 seconds.'}
-    ];
-    var dur=[2000,2200,1800],i=0;
-    function next(){
-      var s=steps[i];
-      document.getElementById('pdPhase').textContent=s.phase;
-      document.getElementById('pdSub').textContent=s.sub;
-      ['pd1','pd2','pd3'].forEach(function(id,j){
-        document.getElementById(id).classList.toggle('on',j===i);
-      });
-      var wait=dur[i]; i=(i+1)%steps.length;
-      setTimeout(next,wait);
+    var canvas=document.getElementById('packCanvas');
+    var ctx=canvas.getContext('2d');
+
+    function resize(){
+      var p=canvas.parentElement;
+      canvas.width=p.clientWidth;
+      canvas.height=p.clientWidth*9/16;
     }
-    setTimeout(next,2000);
+    resize();
+    window.addEventListener('resize',resize);
+
+    function easeSpring(t){
+      if(t<=0)return 0; if(t>=1)return 1;
+      return 1-Math.pow(2,-10*t)*Math.cos(t*Math.PI*3.5);
+    }
+    function easeIO(t){return t<.5?2*t*t:-1+(4-2*t)*t;}
+    function lerp(a,b,t){return a+(b-a)*Math.max(0,Math.min(1,t));}
+    function remap(v,a,b,c,d){return lerp(c,d,(v-a)/(b-a));}
+
+    function poly(pts,fill,stroke){
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0],pts[0][1]);
+      for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);
+      ctx.closePath();
+      if(fill){ctx.fillStyle=fill;ctx.fill();}
+      if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1;ctx.stroke();}
+    }
+
+    function drawBox(cx,cy,W,D,H,lidP){
+      var sd='rgba(0,0,0,0.22)';
+      var T=[cx,cy-D], R=[cx+W,cy], Bo=[cx,cy+D], Lf=[cx-W,cy];
+      var RB=[cx+W,cy+H], BoB=[cx,cy+D+H], LB=[cx-W,cy+H];
+
+      if(H>1){poly([R,Bo,BoB,RB],'#9E7030',sd);}
+      if(H>1){poly([Lf,Bo,BoB,LB],'#7A5520',sd);}
+      poly([T,R,Bo,Lf],'#C49A5A',sd);
+
+      if(H>2 && lidP>0){
+        var p=easeIO(lidP), fh=D*0.88*p;
+        poly([R,Bo,[Bo[0]-fh*0.5,Bo[1]-fh],[R[0]-fh*0.5,R[1]-fh]],'#B08540',sd);
+        poly([Lf,Bo,[Bo[0]+fh*0.5,Bo[1]-fh],[Lf[0]+fh*0.5,Lf[1]-fh]],'#C09550',sd);
+        if(lidP>0.35){
+          var p2=remap(lidP,0.35,1,0,1), fh2=D*0.82*easeIO(p2);
+          poly([T,R,[R[0]-fh2*0.3,R[1]+fh2],[T[0]-fh2*0.3,T[1]+fh2]],'#D4AA6A',sd);
+          poly([T,Lf,[Lf[0]+fh2*0.3,Lf[1]+fh2],[T[0]+fh2*0.3,T[1]+fh2]],'#C49A5A',sd);
+        }
+      }
+
+      if(H>20 && lidP<0.05){
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(T[0],T[1]);ctx.lineTo(R[0],R[1]);
+        ctx.lineTo(Bo[0],Bo[1]);ctx.lineTo(Lf[0],Lf[1]);ctx.closePath();
+        ctx.strokeStyle='rgba(102,187,106,0.55)';
+        ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.stroke();
+        ctx.setLineDash([]);ctx.restore();
+      }
+    }
+
+    function drawSteps(cw,ch,active){
+      var lbs=['PULL','LOAD','SEAL'], sp=88, sx=cw/2-sp, y=ch-30;
+      for(var i=0;i<3;i++){
+        var x=sx+i*sp, on=i<active;
+        if(i<2){
+          ctx.beginPath();ctx.moveTo(x+9,y-4);ctx.lineTo(x+sp-9,y-4);
+          ctx.strokeStyle=on?'rgba(102,187,106,0.4)':'rgba(255,255,255,0.08)';
+          ctx.lineWidth=1.5;ctx.stroke();
+        }
+        ctx.beginPath();ctx.arc(x,y-4,6,0,Math.PI*2);
+        ctx.fillStyle=on?'#66BB6A':'rgba(255,255,255,0.13)';
+        if(on){ctx.shadowColor='#66BB6A';ctx.shadowBlur=10;}
+        ctx.fill();ctx.shadowBlur=0;
+        ctx.font='600 10px -apple-system,sans-serif';
+        ctx.fillStyle=on?'#66BB6A':'rgba(255,255,255,0.22)';
+        ctx.textAlign='center';ctx.textBaseline='top';
+        ctx.fillText(lbs[i],x,y+6);
+      }
+    }
+
+    var LOOP=7200, st=null;
+    function frame(ts){
+      if(!st)st=ts;
+      var el=(ts-st)%LOOP, t=el/LOOP;
+      var cw=canvas.width, ch=canvas.height;
+      var cx=cw*0.5, cy=ch*0.40;
+      var W=Math.min(cw*0.19,125), D=W*0.56;
+      var maxH=Math.min(ch*0.32,165);
+
+      var g=ctx.createLinearGradient(0,0,cw,ch);
+      g.addColorStop(0,'#0c1a0c');g.addColorStop(1,'#162816');
+      ctx.fillStyle=g;ctx.fillRect(0,0,cw,ch);
+
+      var H,lidP,pt,pd,as,al;
+      if(t<0.06){
+        H=0;lidP=0;pt='COMPACT & FLAT';pd='Ships and stores flat.';as=0;al=remap(t,0,0.05,0,1);
+      }else if(t<0.28){
+        H=lerp(0,maxH,easeSpring(remap(t,0.06,0.28,0,1)));
+        lidP=0;pt='PULL →';pd='One pull — box snaps into shape.';as=1;al=1;
+      }else if(t<0.55){
+        H=maxH;lidP=0;pt='LOAD ↓';pd='Rigid sides. Just fill it up.';as=2;al=1;
+      }else if(t<0.76){
+        H=maxH;lidP=remap(t,0.55,0.76,0,1);pt='SEAL ✓';pd='Close the top. Done in 10 seconds.';as=3;al=1;
+      }else if(t<0.91){
+        H=maxH;lidP=1;pt='✓ DONE';pd='75% faster than traditional boxes.';as=3;al=1;
+      }else{
+        H=maxH;lidP=1;pt='✓ DONE';pd='75% faster than traditional boxes.';as=3;al=remap(t,0.91,1,1,0);
+      }
+
+      ctx.globalAlpha=al;
+      drawBox(cx,cy,W,D,H,lidP);
+
+      var badge='⚡ 75% FASTER';
+      ctx.font='700 11px -apple-system,sans-serif';
+      var bw=ctx.measureText(badge).width+24,bh=26,bx=cw-bw-16,by=14;
+      ctx.beginPath();ctx.roundRect(bx,by,bw,bh,13);
+      ctx.fillStyle='rgba(76,175,80,0.9)';ctx.fill();
+      ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(badge,bx+bw/2,by+bh/2);
+
+      ctx.font='700 17px -apple-system,sans-serif';
+      ctx.fillStyle='#66BB6A';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(pt,cx,ch*0.76);
+      ctx.font='13px -apple-system,sans-serif';
+      ctx.fillStyle='rgba(255,255,255,0.48)';
+      ctx.fillText(pd,cx,ch*0.83);
+
+      drawSteps(cw,ch,as);
+
+      ctx.font='10px -apple-system,sans-serif';
+      ctx.fillStyle='rgba(255,255,255,0.16)';ctx.textBaseline='bottom';
+      ctx.fillText('Traditional: 6+ steps   →   PackSource: Pull · Load · Seal',cx,ch-7);
+
+      ctx.globalAlpha=1;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
   })();
   <\/script>
-
-  <!-- To add real video later: remove this div and uncomment iframe below -->
-  <!-- <iframe src="https://www.youtube.com/embed/YOUR_ID" style="width:100%;height:100%;border:none;" allowfullscreen></iframe> -->
 </div>
 
       <p style="text-align:center;margin-top:24px;color:var(--gray-700);">
