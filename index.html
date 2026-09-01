@@ -898,20 +898,14 @@
         <p class="section-sub">Watch how our auto-assembly box eliminates every frustrating step of traditional cardboard — no tape, no folding, no wasted time.</p>
       </div>
 
-      <div style="max-width:780px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);position:relative;aspect-ratio:16/9;background:#0c1a0c;">
-  <canvas id="packCanvas" style="display:block;width:100%;height:100%;"></canvas>
+      <div style="max-width:780px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-md);position:relative;background:#0c1a0c;">
+  <canvas id="packCanvas" width="780" height="439" style="display:block;width:100%;height:auto;"></canvas>
   <script>
   (function(){
     var canvas=document.getElementById('packCanvas');
     var ctx=canvas.getContext('2d');
 
-    function resize(){
-      var p=canvas.parentElement;
-      canvas.width=p.clientWidth;
-      canvas.height=p.clientWidth*9/16;
-    }
-    resize();
-    window.addEventListener('resize',resize);
+    // Canvas is fixed 780x439; CSS width:100% scales it visually
 
     function easeSpring(t){
       if(t<=0)return 0; if(t>=1)return 1;
@@ -1016,7 +1010,12 @@
       var badge='⚡ 75% FASTER';
       ctx.font='700 11px -apple-system,sans-serif';
       var bw=ctx.measureText(badge).width+24,bh=26,bx=cw-bw-16,by=14;
-      ctx.beginPath();ctx.roundRect(bx,by,bw,bh,13);
+      ctx.beginPath();
+      ctx.moveTo(bx+13,by);ctx.lineTo(bx+bw-13,by);
+      ctx.arcTo(bx+bw,by,bx+bw,by+13,13);
+      ctx.lineTo(bx+bw,by+bh-13);ctx.arcTo(bx+bw,by+bh,bx+bw-13,by+bh,13);
+      ctx.lineTo(bx+13,by+bh);ctx.arcTo(bx,by+bh,bx,by+bh-13,13);
+      ctx.lineTo(bx,by+13);ctx.arcTo(bx,by,bx+13,by,13);ctx.closePath();
       ctx.fillStyle='rgba(76,175,80,0.9)';ctx.fill();
       ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.fillText(badge,bx+bw/2,by+bh/2);
